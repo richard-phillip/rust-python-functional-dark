@@ -1,0 +1,18 @@
+[project]
+name = "infoknot"
+version = "0.2.0"
+description = "Python emitter for snap, the typed-graph DSL with the 🪢 magic header."
+requires-python = ">=3.12"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["infoknot"]
+
+[tool.setuptools.package-dir]
+infoknot = "."
+
+[tool.setuptools.exclude-package-data]
+infoknot = ["tests/*", "pyproject.toml", "readme.md", ".gitignore"]
