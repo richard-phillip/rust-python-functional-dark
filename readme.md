@@ -14,7 +14,7 @@ A dark color theme for VS Code optimized for Rust and Python development.
 
 ## Screenview
 
-[![Screenview](https://raw.githubusercontent.com/richard-phillip/rust-python-functional-dark/main/media/rpfd-screenview.gif)](https://github.com/richard-phillip/rust-python-functional-dark/blob/main/media/rpfd-screenview.gif)
+[![Screenview](https://raw.githubusercontent.com/richard-phillip/rust-python-functional-dark/refs/heads/main/media/rpfd-screenview.gif)](https://github.com/richard-phillip/rust-python-functional-dark/blob/main/media/rpfd-screenview.gif)
 
 ## Design Philosophy
 
