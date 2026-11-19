@@ -21,4 +21,4 @@ On https://marketplace.visualstudio.com/manage/publishers/RichardPhillip open Tr
 - Workflow: `publish.yaml`
 - Environment: leave empty
 
-The workflow is `.github/workflows/publish.yaml`. Run it with Actions, then Run workflow.
+The workflow is `.github/workflows/publish.yaml`. Run it from Actions. The `extension` input publishes this theme, Tempo (`richard-phillip/tempo-language`), or both. That same policy is what publishes Tempo.

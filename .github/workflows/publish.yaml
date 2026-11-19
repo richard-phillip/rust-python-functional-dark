@@ -2,17 +2,68 @@ name: Publish
 
 on:
   workflow_dispatch:
+    inputs:
+      extension:
+        description: Extension to publish
+        required: true
+        default: theme
+        type: choice
+        options:
+          - theme
+          - tempo
+          - both
 
 permissions:
   contents: read
   id-token: write
 
 jobs:
-  publish:
+  theme:
+    if: inputs.extension == 'theme' || inputs.extension == 'both'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npx --yes @vscode/vsce@4.1.1 publish --oidc --no-dependencies
+      - name: Publish theme
+        run: npx --yes @vscode/vsce@4.1.1 publish --oidc --no-dependencies
+      - name: Wait until the theme package is public
+        run: |
+          version=$(node -p "require('./package.json').version")
+          url="https://marketplace.visualstudio.com/_apis/public/gallery/publishers/RichardPhillip/vsextensions/rust-python-functional-dark-theme/${version}/vspackage"
+          for i in $(seq 1 24); do
+            code=$(curl -sS -o /dev/null -w "%{http_code}" -r 0-40 "$url" || true)
+            echo "theme ${version} try ${i} ${code}"
+            if [ "$code" = "200" ] || [ "$code" = "206" ]; then
+              exit 0
+            fi
+            sleep 15
+          done
+          exit 1
+
+  tempo:
+    if: inputs.extension == 'tempo' || inputs.extension == 'both'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Publish Tempo
+        run: |
+          git clone --depth 1 https://github.com/richard-phillip/tempo-language.git "$RUNNER_TEMP/tempo-language"
+          cd "$RUNNER_TEMP/tempo-language"
+          npx --yes @vscode/vsce@4.1.1 publish --oidc --no-dependencies
+      - name: Wait until Tempo is public
+        run: |
+          version=$(node -p "require(process.env.RUNNER_TEMP + '/tempo-language/package.json').version")
+          url="https://marketplace.visualstudio.com/_apis/public/gallery/publishers/RichardPhillip/vsextensions/tempo-language/${version}/vspackage"
+          for i in $(seq 1 24); do
+            code=$(curl -sS -o /dev/null -w "%{http_code}" -r 0-40 "$url" || true)
+            echo "tempo ${version} try ${i} ${code}"
+            if [ "$code" = "200" ] || [ "$code" = "206" ]; then
+              exit 0
+            fi
+            sleep 15
+          done
+          exit 1
