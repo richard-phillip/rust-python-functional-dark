@@ -3,7 +3,7 @@
 Publisher ID: `RichardPhillip`
 Publisher name: eigenform
 Account: richard@eigenform.art
-Extension: `rust-python-functional-dark`
+Extension: `rust-python-functional-dark-theme`
 
 The same publisher also publishes `the-fold-pdf`.
 
