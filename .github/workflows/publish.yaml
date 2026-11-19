@@ -12,6 +12,7 @@ on:
           - theme
           - tempo
           - both
+          - fold
 
 permissions:
   contents: read
@@ -41,6 +42,81 @@ jobs:
             sleep 15
           done
           exit 1
+
+  fold:
+    if: inputs.extension == 'fold'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Publish the Fold subtitle
+        run: |
+          python3 - << 'PY'
+          import gzip
+          import json
+          import urllib.request
+          import zipfile
+          from pathlib import Path
+
+          url = "https://marketplace.visualstudio.com/_apis/public/gallery/publishers/RichardPhillip/vsextensions/the-fold-pdf/0.6.10/vspackage"
+          with urllib.request.urlopen(url) as response:
+              data = response.read()
+          if data[:2] == b"\x1f\x8b":
+              data = gzip.decompress(data)
+          src = Path("/tmp/fold-0.6.10.vsix")
+          src.write_bytes(data)
+          description = "print active md or tsv to pdf in place."
+          out = Path("/tmp/the-fold-pdf-0.6.11.vsix")
+          with zipfile.ZipFile(src) as zin, zipfile.ZipFile(out, "w") as zout:
+              for item in zin.infolist():
+                  payload = zin.read(item.filename)
+                  if item.filename == "extension/package.json":
+                      package = json.loads(payload)
+                      package["description"] = description
+                      package["version"] = "0.6.11"
+                      package["publisher"] = "RichardPhillip"
+                      payload = (json.dumps(package, indent=2) + "\n").encode()
+                  elif item.filename == "extension.vsixmanifest":
+                      text = payload.decode("utf-8")
+                      old = "Render the current Markdown or TSV file to a vector-first PDF beside the source file."
+                      if old not in text or 'Version="0.6.10"' not in text:
+                          raise SystemExit("published Fold manifest did not match 0.6.10")
+                      text = text.replace('Version="0.6.10" Publisher="richardphillip"', 'Version="0.6.11" Publisher="RichardPhillip"')
+                      text = text.replace(old, description)
+                      payload = text.encode("utf-8")
+                  info = zipfile.ZipInfo(filename=item.filename, date_time=item.date_time)
+                  info.compress_type = item.compress_type or zipfile.ZIP_DEFLATED
+                  info.external_attr = item.external_attr
+                  zout.writestr(info, payload)
+          print(out, out.stat().st_size)
+          PY
+          npx --yes @vscode/vsce@4.1.1 publish --oidc --no-dependencies --packagePath /tmp/the-fold-pdf-0.6.11.vsix
+      - name: Wait until the Fold subtitle is public
+        run: |
+          python3 - << 'PY'
+          import json
+          import time
+          import urllib.request
+
+          want = "print active md or tsv to pdf in place."
+          for i in range(1, 25):
+              body = json.dumps({"filters":[{"criteria":[{"filterType":7,"value":"RichardPhillip.the-fold-pdf"}]}],"flags":914}).encode()
+              req = urllib.request.Request(
+                  "https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery",
+                  data=body,
+                  headers={"Content-Type":"application/json","Accept":"application/json;api-version=3.0-preview.1"},
+              )
+              with urllib.request.urlopen(req) as response:
+                  extension = json.load(response)["results"][0]["extensions"][0]
+              version = extension["versions"][0]["version"]
+              subtitle = extension.get("shortDescription")
+              print(f"fold try {i} {version} {subtitle}", flush=True)
+              if version == "0.6.11" and subtitle == want:
+                  raise SystemExit(0)
+              time.sleep(15)
+          raise SystemExit(1)
+          PY
 
   tempo:
     if: inputs.extension == 'tempo' || inputs.extension == 'both'
