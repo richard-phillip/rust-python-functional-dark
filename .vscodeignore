@@ -1,7 +1,14 @@
 .DS_Store
 *.vsix
 py/**
+python/**
 rust/**
+samples/**
 .claude/**
+.git/**
+.gitignore
+.vsixmanifest
 quickbuild.zsh
 palette.md
+marketplace.md
+snap_specification.md

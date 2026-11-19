@@ -9,11 +9,26 @@
   "categories": [
     "Themes"
   ],
+  "publisher": "RichardPhillip",
+  "author": {
+    "name": "Richard Phillip",
+    "email": "richard@eigenform.art",
+    "url": "https://eigenform.art"
+  },
+  "license": "MIT",
+  "homepage": "https://eigenform.art",
+  "bugs": {
+    "url": "https://github.com/richard-phillip/rust-python-functional-dark/issues"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/richard-phillip/rust-python-functional-dark"
   },
-  "icon": "media/rust-python-functional-dark.gif",
+  "icon": "media/rust-python-functional-dark.png",
+  "galleryBanner": {
+    "color": "#131315",
+    "theme": "dark"
+  },
   "contributes": {
     "themes": [
       {
@@ -49,11 +64,5 @@
         "path": "./syntaxes/snap.tmLanguage.json"
       }
     ]
-  },
-  "publisher": "richardphillip",
-  "__metadata": {
-    "installedTimestamp": 1769300699442,
-    "targetPlatform": "undefined",
-    "size": 22764
   }
 }
